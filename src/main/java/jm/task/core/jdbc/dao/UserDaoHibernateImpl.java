@@ -29,6 +29,8 @@ public class UserDaoHibernateImpl implements UserDao {
                     "  `age` INT NOT NULL,\n" +
                     "  PRIMARY KEY (`id`));").executeUpdate();
             session.getTransaction().commit();
+        } catch (Exception e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
         }
     }
 
@@ -38,6 +40,8 @@ public class UserDaoHibernateImpl implements UserDao {
             session.beginTransaction();
             session.createSQLQuery("DROP TABLE IF EXISTS users").addEntity(User.class).executeUpdate();
             session.getTransaction().commit();
+        } catch (Exception e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
         }
     }
 
@@ -47,6 +51,8 @@ public class UserDaoHibernateImpl implements UserDao {
             session.beginTransaction();
             session.save(new User(name, lastName, age));
             session.getTransaction().commit();
+        } catch (Exception e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
         }
     }
 
@@ -56,21 +62,26 @@ public class UserDaoHibernateImpl implements UserDao {
             session.beginTransaction();
             session.createSQLQuery("DELETE FROM users WHERE id=" + id).executeUpdate();
             session.getTransaction().commit();
+        } catch (Exception e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
         }
     }
 
     @Override
     public List<User> getAllUsers() {
+        List<User> users = null;
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
             CriteriaBuilder builder = session.getCriteriaBuilder();
             CriteriaQuery<User> criteria = builder.createQuery(User.class);
             Root<User> root = criteria.from(User.class);
             criteria.select(root);
-            List<User> users = session.createQuery(criteria).getResultList();
+            users = session.createQuery(criteria).getResultList();
             session.getTransaction().commit();
-            return users;
+        } catch (Exception e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
         }
+        return users;
     }
 
     @Override
@@ -79,6 +90,8 @@ public class UserDaoHibernateImpl implements UserDao {
             session.beginTransaction();
             session.createSQLQuery("TRUNCATE TABLE users").executeUpdate();
             session.getTransaction().commit();
+        } catch (Exception e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
         }
     }
 }
